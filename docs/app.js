@@ -295,11 +295,47 @@ async function showItem(){
   $('v-sub').textContent=it.name||'';
   const url=await urlArchivo(it.id);
   if(!url){$('v-stage').innerHTML='<div class="empty"><strong>No se encontró el archivo</strong></div>'}
-  else $('v-stage').innerHTML=isImg(it.type)?`<img src="${url}" alt="${esc(it.name||it.label)}">`:`<iframe src="${url}" title="${esc(it.name||it.label)}"></iframe>`;
+  else if(isImg(it.type))$('v-stage').innerHTML=`<img src="${url}" alt="${esc(it.name||it.label)}">`;
+  else{$('v-stage').innerHTML='<div class="pdfpages" id="pdfpages"><div class="pdfmsg">Cargando PDF…</div></div>';mostrarPdf(it.id,url)}
   $('v-nav').innerHTML=vItems.length>1?`<button class="btn small" id="v-prev" type="button">‹ Anterior</button><span>${vIdx+1} de ${vItems.length}</span><button class="btn small" id="v-next" type="button">Siguiente ›</button>`:'';
   if(vItems.length>1){$('v-prev').onclick=()=>{vIdx=(vIdx-1+vItems.length)%vItems.length;showItem()};$('v-next').onclick=()=>{vIdx=(vIdx+1)%vItems.length;showItem()}}
 }
-function cerrarVisor(){$('viewer').hidden=true;$('v-stage').innerHTML='';document.body.style.overflow=''}
+/* PDF: el iPhone solo muestra la primera página dentro de la app, así que se dibujan todas con pdf.js */
+let pdfLib=null, pdfTurno=0;
+function cargarPdfLib(){
+  if(pdfLib)return pdfLib;
+  pdfLib=new Promise((res,rej)=>{
+    const s=document.createElement('script');s.src='vendor/pdfjs/pdf.min.js';
+    s.onload=()=>{window.pdfjsLib.GlobalWorkerOptions.workerSrc='vendor/pdfjs/pdf.worker.min.js';res(window.pdfjsLib)};
+    s.onerror=()=>{pdfLib=null;rej(new Error('pdfjs'))};document.head.appendChild(s);
+  });
+  return pdfLib;
+}
+async function mostrarPdf(id,url){
+  const turno=++pdfTurno, box=$('pdfpages');
+  try{
+    const [lib,a]=await Promise.all([cargarPdfLib(),store.get('archivos',id)]);
+    const doc=await lib.getDocument({data:new Uint8Array(a.data.slice(0))}).promise;
+    if(turno!==pdfTurno)return;
+    box.innerHTML='';
+    const ancho=Math.min(box.clientWidth||window.innerWidth,1000), dpr=Math.min(window.devicePixelRatio||1,2);
+    for(let i=1;i<=doc.numPages;i++){
+      const page=await doc.getPage(i);
+      if(turno!==pdfTurno)return;
+      const vp=page.getViewport({scale:ancho/page.getViewport({scale:1}).width*dpr});
+      const c=document.createElement('canvas');c.width=Math.floor(vp.width);c.height=Math.floor(vp.height);
+      const fig=document.createElement('figure');fig.className='pdfpage';
+      const cap=document.createElement('figcaption');cap.textContent='Página '+i+' de '+doc.numPages;
+      fig.append(c,cap);box.appendChild(fig);
+      await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+      page.cleanup();
+    }
+  }catch{
+    if(turno!==pdfTurno)return;
+    box.innerHTML=`<div class="pdfmsg">No se pudieron mostrar todas las páginas aquí. Toque <b>Compartir / guardar</b> para abrirlo completo.</div><iframe src="${url}" title="PDF"></iframe>`;
+  }
+}
+function cerrarVisor(){pdfTurno++;$('viewer').hidden=true;$('v-stage').innerHTML='';document.body.style.overflow=''}
 $('v-close').onclick=cerrarVisor;
 $('viewer').addEventListener('click',e=>{if(e.target.id==='viewer'||e.target.id==='v-stage')cerrarVisor()});
 document.addEventListener('keydown',e=>{if($('viewer').hidden)return;if(e.key==='Escape')cerrarVisor();if(vItems.length>1&&e.key==='ArrowRight'){vIdx=(vIdx+1)%vItems.length;showItem()}if(vItems.length>1&&e.key==='ArrowLeft'){vIdx=(vIdx-1+vItems.length)%vItems.length;showItem()}});

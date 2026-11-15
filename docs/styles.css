@@ -3,7 +3,7 @@
   --bg:#eef2f3; --surface:#ffffff; --ink:#14232b; --muted:#5b6d75; --line:#d3dde0;
   --navy:#173a4a; --amber:#c97a12; --amber-soft:#fbefd9;
   --ok:#2f7a4f; --ok-soft:#e2f2e8; --warn:#a8650c; --warn-soft:#fbeed8; --info:#2c5f8a; --info-soft:#e1ecf6; --bad:#b3362c; --bad-soft:#f8e3e0;
-  --scrim:rgba(8,16,20,.97);
+  --scrim:#0b1418;
   --f-display:"Barlow Condensed","Arial Narrow",sans-serif;
   --f-body:"Source Sans 3",-apple-system,system-ui,sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
@@ -13,13 +13,13 @@
   --bg:#0f1a1f; --surface:#16252c; --ink:#e3ecef; --muted:#93a7ae; --line:#2a3d45;
   --navy:#8fc3d8; --amber:#f0a540; --amber-soft:#3a2c14;
   --ok:#6fcf97; --ok-soft:#173326; --warn:#f0b259; --warn-soft:#3a2b13; --info:#8bbbe6; --info-soft:#172b3d; --bad:#ef8a80; --bad-soft:#3d1c19;
-  --scrim:rgba(0,0,0,.97);
+  --scrim:#050a0c;
   color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0f1a1f; --surface:#16252c; --ink:#e3ecef; --muted:#93a7ae; --line:#2a3d45;
   --navy:#8fc3d8; --amber:#f0a540; --amber-soft:#3a2c14;
   --ok:#6fcf97; --ok-soft:#173326; --warn:#f0b259; --warn-soft:#3a2b13; --info:#8bbbe6; --info-soft:#172b3d; --bad:#ef8a80; --bad-soft:#3d1c19;
-  --scrim:rgba(0,0,0,.97);
+  --scrim:#050a0c;
   color-scheme:dark}
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -168,6 +168,12 @@ tfoot td{font-weight:600;background:var(--bg)}
 .viewer-bar .vs{font-size:13px;opacity:.8;word-break:break-all}
 .viewer-stage{display:grid;place-items:center;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
 .viewer-stage img{max-width:100%;max-height:100%;object-fit:contain;border-radius:4px}
-.viewer-stage iframe{width:100%;height:100%;border:0;border-radius:4px;background:#fff}
+.viewer-stage iframe{width:100%;height:100%;min-height:60vh;border:0;border-radius:4px;background:#fff}
+.viewer-stage:has(.pdfpages){display:block}
+.pdfpages{display:grid;gap:14px;max-width:1000px;margin:0 auto;width:100%}
+.pdfpage{margin:0;display:grid;gap:4px}
+.pdfpage canvas{width:100%;height:auto;background:#fff;border-radius:4px;display:block}
+.pdfpage figcaption{font-family:var(--f-mono);font-size:12px;color:#fff;opacity:.75;text-align:center}
+.pdfmsg{color:#fff;text-align:center;padding:24px 8px;display:grid;gap:12px}
 .viewer-nav{display:flex;justify-content:center;gap:10px;align-items:center;color:#fff;font-family:var(--f-mono);font-size:13px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}

@@ -1,7 +1,7 @@
 // Funcionamiento sin internet: guarda la app en el teléfono.
 // Cambie VERSION cuando publique cambios para que el iPhone descargue la nueva versión.
-const VERSION='bitacora-v1';
-const APP=['./','index.html','styles.css','app.js','manifest.webmanifest','icons/apple-touch-icon.png','icons/icon-192.png','icons/icon-512.png'];
+const VERSION='bitacora-v2';
+const APP=['./','index.html','styles.css','app.js','manifest.webmanifest','icons/apple-touch-icon.png','icons/icon-192.png','icons/icon-512.png','vendor/pdfjs/pdf.min.js','vendor/pdfjs/pdf.worker.min.js'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(VERSION).then(c=>c.addAll(APP)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==VERSION).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{

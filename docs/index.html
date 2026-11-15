@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bitácora de vuelos</title>
+<meta name="description" content="Bitácora de vuelos de la Corporación VDC: registro, soportes y conciliación mensual por avión.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#173a4a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bitácora">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="topbar" aria-hidden="true"></div>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Corporación VDC · vuelos en aviones de Aeromenegua y otros</div>
+      <h1>Bitácora de vuelos</h1>
+    </div>
+    <div class="monthbar">
+      <button class="btn icon" id="prev" type="button" aria-label="Mes anterior">‹</button>
+      <input type="month" id="mes" aria-label="Mes">
+      <button class="btn icon" id="next" type="button" aria-label="Mes siguiente">›</button>
+    </div>
+  </header>
+
+  <div class="install" id="install" hidden>
+    <div><strong>Instale la bitácora en su iPhone</strong>
+    En Safari toque <b>Compartir</b> <span class="shareico" aria-hidden="true">⬆︎</span> y luego <b>Añadir a pantalla de inicio</b>. Se abrirá como una app, sin el navegador, y funciona sin internet.</div>
+    <button class="btn small" id="install-close" type="button">Entendido</button>
+  </div>
+
+  <section aria-labelledby="h-res">
+    <div class="table-head"><h2 id="h-res">Resumen de <span id="mes-label"></span></h2><span class="status" id="status">Cargando registros…</span></div>
+    <div class="summary" id="summary"></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-form">
+    <div class="form-head"><h2 id="h-form">Registrar vuelo</h2><span class="editing" id="editing" hidden>Editando un vuelo</span></div>
+    <form id="form" autocomplete="off">
+      <div class="grid">
+        <div class="f c3"><label for="f-fecha">Fecha</label><input type="date" id="f-fecha" required></div>
+        <div class="f c3"><label for="f-avion">Avión</label>
+          <select id="f-avion" required>
+            <option value="HK1960">HK1960 · C-172</option>
+            <option value="HK2264">HK2264</option>
+            <option value="HK2915">HK2915 · C-206</option>
+            <option value="OTRO">Otro avión</option>
+          </select></div>
+        <div class="f c6"><label for="f-ruta">Ruta</label><input id="f-ruta" placeholder="Mitú – Carurú – Mitú" required></div>
+        <div class="otro-box" id="otro-box" hidden>
+          <div class="f c4"><label for="f-otro-mat">Matrícula</label><input id="f-otro-mat" placeholder="HK0000" class="mono" autocapitalize="characters"></div>
+          <div class="f c4"><label for="f-otro-tipo">Tipo de avión</label><input id="f-otro-tipo" placeholder="Cessna C-208 Caravan"></div>
+          <div class="f c4"><label for="f-otro-emp">Empresa (opcional)</label><input id="f-otro-emp" placeholder="Operador"></div>
+        </div>
+        <div class="f c5"><label for="f-motivo">Motivo / pasajeros</label><input id="f-motivo" placeholder="Visita contrato, 3 pasajeros"></div>
+        <div class="f c3"><label for="f-piloto">Piloto</label><input id="f-piloto"></div>
+        <div class="f c4"><label for="f-valor">Valor acordado (COP)</label><input id="f-valor" inputmode="numeric" placeholder="2.400.000" required></div>
+        <div class="f c3"><label for="f-estado">Estado</label>
+          <select id="f-estado">
+            <option value="pendiente">Pendiente</option>
+            <option value="encuenta">Cobrado en la cuenta</option>
+            <option value="pagado">Pagado</option>
+          </select></div>
+        <div class="f c3"><label for="f-gal">Galones (si los sabe)</label><input id="f-gal" inputmode="decimal"></div>
+        <div class="f c6"><label for="f-nota">Nota</label><input id="f-nota" placeholder="Soporte, recibo, observación"></div>
+      </div>
+
+      <div class="soportes" id="soportes">
+        <div class="soportes-head"><h3>Soportes del vuelo</h3><span class="status" id="sop-hint">Fotos o PDF, hasta 20 MB por archivo. Las fotos se reducen antes de guardar.</span></div>
+        <div class="slots" id="slots"></div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn primary" id="save" type="submit">Guardar vuelo</button>
+        <button class="btn" id="cancel" type="button" hidden>Cancelar edición</button>
+        <span class="status" id="form-status" role="status"></span>
+      </div>
+    </form>
+  </section>
+
+  <section aria-labelledby="h-tab">
+    <div class="table-head">
+      <h2 id="h-tab">Vuelos del mes</h2>
+      <div class="filters" id="filters" role="group" aria-label="Filtrar por avión"></div>
+    </div>
+    <div class="scroll" id="table-wrap"></div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section class="card backup" aria-labelledby="h-bak">
+    <div class="form-head"><h2 id="h-bak">Datos y respaldo</h2><span class="status" id="uso"></span></div>
+    <p>Los vuelos y soportes se guardan <b>solo en este dispositivo</b>. Haga un respaldo cada mes y guárdelo en Archivos, iCloud o envíeselo por correo. Con ese archivo puede recuperar todo en otro teléfono.</p>
+    <div class="form-actions">
+      <button class="btn primary" id="exportar" type="button">Hacer respaldo</button>
+      <label class="btn" for="importar">Restaurar respaldo<input type="file" id="importar" accept="application/json,.json" class="vh"></label>
+      <span class="status" id="bak-status" role="status"></span>
+    </div>
+  </section>
+</div>
+
+<div class="viewer" id="viewer" hidden role="dialog" aria-modal="true" aria-labelledby="v-title">
+  <div class="viewer-bar">
+    <div><div class="vt" id="v-title"></div><div class="vs" id="v-sub"></div></div>
+    <div class="viewer-actions">
+      <button class="btn small" id="v-share" type="button">Compartir / guardar</button>
+      <button class="btn small" id="v-close" type="button">Cerrar</button>
+    </div>
+  </div>
+  <div class="viewer-stage" id="v-stage"></div>
+  <div class="viewer-nav" id="v-nav"></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
